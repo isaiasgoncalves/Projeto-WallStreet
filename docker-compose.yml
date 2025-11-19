@@ -1,0 +1,28 @@
+services:
+  # Serviço do Banco de Dados
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=pws_db
+    ports:
+      - "5432:5432" # Permite acessar o banco pelo DBeaver/PgAdmin na sua máquina
+
+  # Serviço da Aplicação (Seu código)
+  web:
+    build: .
+    command: streamlit run app/main.py --server.port=8501 --server.address=0.0.0.0
+    volumes:
+      - ./app:/app/app # Sincroniza sua pasta local com o container (Hot Reload)
+    ports:
+      - "8501:8501"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/pws_db
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
